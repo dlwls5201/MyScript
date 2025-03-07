@@ -6,6 +6,10 @@ plugins {
     id 'kotlin-android'
 }
 
+// build.gradle (:app 최상단에 추가)
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
 android {
     namespace 'com.myscript.iink.demo'
 
@@ -25,6 +29,8 @@ android {
         versionName '4.0.0'
 
         vectorDrawables.useSupportLibrary true
+
+        buildConfigField "String", "apiKey", "\"${localProperties.getProperty('apiKey')}\""
     }
 }
 
@@ -43,6 +49,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
     implementation project(':UIReferenceImplementation')
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
 
 task DownloadAndExtractAssets(type: Copy) {

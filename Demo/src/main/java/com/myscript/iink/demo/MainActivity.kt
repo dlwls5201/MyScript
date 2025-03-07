@@ -31,6 +31,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.myscript.iink.Editor
 import com.myscript.iink.MimeType
+import com.myscript.iink.demo.data.GeminiRepository
 import com.myscript.iink.demo.databinding.MainActivityBinding
 import com.myscript.iink.demo.di.EditorViewModelFactory
 import com.myscript.iink.demo.domain.BlockType
@@ -52,6 +53,7 @@ import com.myscript.iink.demo.ui.ThicknessesAdapter
 import com.myscript.iink.demo.ui.ToolState
 import com.myscript.iink.demo.ui.ToolsAdapter
 import com.myscript.iink.demo.ui.primaryFileExtension
+import com.myscript.iink.demo.util.Dlog
 import com.myscript.iink.demo.util.launchActionChoiceDialog
 import com.myscript.iink.demo.util.launchPredictionDialog
 import com.myscript.iink.demo.util.launchSingleChoiceDialog
@@ -251,6 +253,22 @@ class MainActivity : AppCompatActivity() {
         predictTextBtn = findViewById(com.myscript.iink.uireferenceimplementation.R.id.btn_predict_text)
         predictTextBtn?.setOnClickListener {
             val smartViewText = smartGuideView?.getSmartViewText() ?: return@setOnClickListener
+            lifecycle.coroutineScope.launch {
+                val response = GeminiRepository.generateText(smartViewText)
+                val builder = AlertDialog.Builder(this@MainActivity)
+                builder.setTitle("Text Prediction")
+                builder.setMessage(response)
+                builder.setPositiveButton("accept") { dialog, _ ->
+                    smartGuideView?.setText(response)
+                    dialog.dismiss()
+                }
+                builder.setNegativeButton("cancel") { dialog, _ ->
+                    dialog.dismiss()
+                }
+
+                val dialog = builder.create()
+                dialog.show()
+            }
         }
 
         setSupportActionBar(binding.toolbar)

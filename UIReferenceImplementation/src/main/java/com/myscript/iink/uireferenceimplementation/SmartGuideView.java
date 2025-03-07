@@ -708,6 +708,19 @@ public class SmartGuideView extends LinearLayout implements IEditorListener, IRe
     return stringBuilder.toString();
   }
 
+  public void setText(String text) {
+    if (editor != null) {
+      try {
+        ContentBlock block = editor.getRootBlock();
+        if (block != null) {
+          editor.import_(MimeType.TEXT, text, block, importParams);
+        }
+      } catch (Exception e) {
+        Log.e(TAG, "Failed to set text in editor", e);
+      }
+    }
+  }
+
   private void computeModificationOfWords(SmartGuideWord[] words, SmartGuideWord[] oldWords)
   {
     int len1 = oldWords.length;
