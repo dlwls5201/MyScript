@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -131,6 +132,7 @@ class MainActivity : AppCompatActivity() {
     private var partState: PartState = PartState.Unloaded
     private val editorBinding = IInkApplication.DemoModule.editorBinding
     private var smartGuideView: SmartGuideView? = null
+    private var predictTextBtn: Button? = null
     private var toolsAdapter = ToolsAdapter { viewModel.changeTool(it) }
     private var colorsAdapter = ColorsAdapter { viewModel.changeColor(it) }
     private var thicknessesAdapter = ThicknessesAdapter { viewModel.changeThickness(it) }
@@ -246,6 +248,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         editorView = findViewById(com.myscript.iink.uireferenceimplementation.R.id.editor_view)
         smartGuideView = findViewById(com.myscript.iink.uireferenceimplementation.R.id.smart_guide_view)
+        predictTextBtn = findViewById(com.myscript.iink.uireferenceimplementation.R.id.btn_predict_text)
+        predictTextBtn?.setOnClickListener {
+            val smartViewText = smartGuideView?.getSmartViewText() ?: return@setOnClickListener
+        }
 
         setSupportActionBar(binding.toolbar)
 

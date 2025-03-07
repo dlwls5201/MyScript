@@ -694,6 +694,20 @@ public class SmartGuideView extends LinearLayout implements IEditorListener, IRe
     }
   }
 
+  public String getSmartViewText() {
+    LinearLayout linearLayout = findViewById(R.id.smart_guide_stack_view);
+    StringBuilder stringBuilder = new StringBuilder();
+
+    for (int i = 0; i < linearLayout.getChildCount(); i++) {
+      View view = linearLayout.getChildAt(i);
+      if (view instanceof TextView) {
+        stringBuilder.append(((TextView) view).getText());
+      }
+    }
+
+    return stringBuilder.toString();
+  }
+
   private void computeModificationOfWords(SmartGuideWord[] words, SmartGuideWord[] oldWords)
   {
     int len1 = oldWords.length;
