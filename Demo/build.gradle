@@ -4,6 +4,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'kotlin-parcelize'
 }
 
 // build.gradle (:app 최상단에 추가)

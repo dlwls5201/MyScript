@@ -1,6 +1,6 @@
 // Copyright @ MyScript. All rights reserved.
 
-package com.myscript.iink.demo
+package com.myscript.iink.demo.presentation
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -31,6 +31,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.myscript.iink.Editor
 import com.myscript.iink.MimeType
+import com.myscript.iink.demo.BuildConfig
+import com.myscript.iink.demo.IInkApplication
+import com.myscript.iink.demo.R
 import com.myscript.iink.demo.data.GeminiRepository
 import com.myscript.iink.demo.databinding.MainActivityBinding
 import com.myscript.iink.demo.di.EditorViewModelFactory
@@ -38,6 +41,7 @@ import com.myscript.iink.demo.domain.BlockType
 import com.myscript.iink.demo.domain.MenuAction
 import com.myscript.iink.demo.domain.PartType
 import com.myscript.iink.demo.domain.PenBrush
+import com.myscript.iink.demo.presentation.model.PageModel
 import com.myscript.iink.demo.ui.ColorState
 import com.myscript.iink.demo.ui.ColorsAdapter
 import com.myscript.iink.demo.ui.ContextualActionState
@@ -53,6 +57,7 @@ import com.myscript.iink.demo.ui.ThicknessesAdapter
 import com.myscript.iink.demo.ui.ToolState
 import com.myscript.iink.demo.ui.ToolsAdapter
 import com.myscript.iink.demo.ui.primaryFileExtension
+import com.myscript.iink.demo.util.Dlog
 import com.myscript.iink.demo.util.launchActionChoiceDialog
 import com.myscript.iink.demo.util.launchPredictionDialog
 import com.myscript.iink.demo.util.launchSingleChoiceDialog
@@ -62,6 +67,7 @@ import com.myscript.iink.uireferenceimplementation.FrameTimeEstimator
 import com.myscript.iink.uireferenceimplementation.IInputControllerListener
 import com.myscript.iink.uireferenceimplementation.SmartGuideView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -163,8 +169,17 @@ class WritingActivity : AppCompatActivity() {
         private const val EnableCapturePredictionByDefault: Boolean = true
         private const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
 
-        fun startActivity(context: Context) {
-            context.startActivity(Intent(context, WritingActivity::class.java))
+        private const val PARAM_PAGE_MODEL = "page"
+
+        fun startActivity(
+            context: Context,
+            pageModel: PageModel = PageModel.EMPTY,
+        ) {
+            context.startActivity(
+                Intent(context, WritingActivity::class.java).apply {
+                    putExtra(PARAM_PAGE_MODEL, pageModel)
+                }
+            )
         }
     }
 
@@ -187,6 +202,7 @@ class WritingActivity : AppCompatActivity() {
                 BottomSheetBehavior.STATE_EXPANDED -> viewModel.expandColorPalette(true)
             }
         }
+
         override fun onSlide(bottomSheet: View, slideOffset: Float) = Unit
     }
 
@@ -203,11 +219,14 @@ class WritingActivity : AppCompatActivity() {
                     viewModel.importContent(file)
                 }
             }
-            else -> onError(Error(
-                Error.Severity.WARNING,
-                getString(R.string.app_error_unsupported_file_type_title),
-                getString(R.string.app_error_unsupported_iink_file_type_message, mimeType)
-            ))
+
+            else -> onError(
+                Error(
+                    Error.Severity.WARNING,
+                    getString(R.string.app_error_unsupported_file_type_title),
+                    getString(R.string.app_error_unsupported_iink_file_type_message, mimeType)
+                )
+            )
         }
     }
 
@@ -231,20 +250,25 @@ class WritingActivity : AppCompatActivity() {
                         // might be an unsupported mime type despite the checks made, if the image
                         // is seen as a PNG but under the hood the file format is WebP which happens
                         // quite easily when importing image from the web for instance
-                        onError(Error(
-                            Error.Severity.ERROR,
-                            getString(R.string.app_error_add_image_title),
-                            e.message ?: "Unknown error",
-                            e
-                        ))
+                        onError(
+                            Error(
+                                Error.Severity.ERROR,
+                                getString(R.string.app_error_add_image_title),
+                                e.message ?: "Unknown error",
+                                e
+                            )
+                        )
                     }
                 }
             }
-            else -> onError(Error(
-                Error.Severity.ERROR,
-                getString(R.string.app_error_unsupported_file_type_title),
-                getString(R.string.app_error_unsupported_image_type_message, mimeType)
-            ))
+
+            else -> onError(
+                Error(
+                    Error.Severity.ERROR,
+                    getString(R.string.app_error_unsupported_file_type_title),
+                    getString(R.string.app_error_unsupported_image_type_message, mimeType)
+                )
+            )
         }
     }
 
@@ -316,21 +340,32 @@ class WritingActivity : AppCompatActivity() {
             penBrushDropdown.onItemSelectedListener = penBrushSelectedListener
         }
 
+        val pageModel = intent.getParcelableExtra<PageModel>(PARAM_PAGE_MODEL)
+        Dlog.d("pageModel: $pageModel")
+        if(pageModel != null) {
+            lifecycle.coroutineScope.launch {
+                delay(100)
+                smartGuideView?.setText(pageModel.pageContent.contents)
+            }
+        }
+
         // Note: could be managed by domain layer and handled through observable error channel
         // but kept simple as is to avoid adding too much complexity for this special (unrecoverable) error case
         if (IInkApplication.DemoModule.engine == null) {
             // the certificate provided in `DemoModule.provideEngine` is most likely incorrect
-            onError(Error(
-                Error.Severity.CRITICAL,
-                getString(R.string.app_error_invalid_certificate_title),
-                getString(R.string.app_error_invalid_certificate_message)
-            ))
+            onError(
+                Error(
+                    Error.Severity.CRITICAL,
+                    getString(R.string.app_error_invalid_certificate_title),
+                    getString(R.string.app_error_invalid_certificate_message)
+                )
+            )
         }
     }
 
     private fun setMargins(editor: Editor, @DimenRes horizontalMarginRes: Int, @DimenRes verticalMarginRes: Int) {
         val displayMetrics = resources.displayMetrics
-        with (editor.configuration) {
+        with(editor.configuration) {
             val verticalMargin = resources.getDimension(verticalMarginRes)
             val horizontalMargin = resources.getDimension(horizontalMarginRes)
             val verticalMarginMM = 25.4f * verticalMargin / displayMetrics.ydpi
@@ -362,6 +397,7 @@ class WritingActivity : AppCompatActivity() {
                             addImagePosition = PointF(actionState.x, actionState.y)
                             importImageRequest.launch("image/*")
                         }
+
                         BlockType.Text -> {
                             // Ensure bottom sheet is collapsed to avoid weird state when IME is dismissed.
                             viewModel.expandColorPalette(false)
@@ -369,10 +405,12 @@ class WritingActivity : AppCompatActivity() {
                                 viewModel.insertText(actionState.x, actionState.y, text)
                             }
                         }
-                        else ->viewModel.addBlock(actionState.x, actionState.y, blockType)
+
+                        else -> viewModel.addBlock(actionState.x, actionState.y, blockType)
                     }
                 }
             }
+
             is ContextualActionState.Action -> {
                 val actions = actionState.items
                 launchActionChoiceDialog(actions.map { getString(it.stringRes) }) { selected ->
@@ -381,26 +419,32 @@ class WritingActivity : AppCompatActivity() {
                             val blocks = viewModel.requestAddBlockActions(actionState.x, actionState.y)
                             showContextualActionDialog(blocks)
                         }
+
                         MenuAction.FORMAT_TEXT -> {
                             val formatTexts = viewModel.requestFormatTextActions(actionState.x, actionState.y, selectedBlockId)
                             showContextualActionDialog(formatTexts, selectedBlockId)
                         }
+
                         MenuAction.SELECTION_MODE -> {
                             val selectionModes = viewModel.requestSelectionModeActions(actionState.x, actionState.y)
                             showContextualActionDialog(selectionModes, selectedBlockId)
                         }
+
                         MenuAction.SELECTION_TYPE -> {
                             val selectionTypes = viewModel.requestSelectionTypeActions(actionState.x, actionState.y, selectedBlockId)
                             showContextualActionDialog(selectionTypes, selectedBlockId)
                         }
+
                         MenuAction.EXPORT -> {
                             val mimeTypes = viewModel.requestExportActions(actionState.x, actionState.y, selectedBlockId)
                             showContextualActionDialog(mimeTypes, selectedBlockId)
                         }
+
                         else -> viewModel.actionMenu(actionState.x, actionState.y, action, selectedBlockId)
                     }
                 }
             }
+
             is ContextualActionState.Export -> onExport(actionState.items, actionState.x, actionState.y, selectedBlockId)
         }
     }
@@ -462,21 +506,22 @@ class WritingActivity : AppCompatActivity() {
             Error.Severity.ERROR,
             Error.Severity.CRITICAL ->
                 AlertDialog.Builder(this)
-                        .setTitle(error.title)
-                        .setMessage(error.message)
-                        .setPositiveButton(R.string.dialog_ok, null)
-                        .show()
+                    .setTitle(error.title)
+                    .setMessage(error.message)
+                    .setPositiveButton(R.string.dialog_ok, null)
+                    .show()
+
             else ->
                 // Note: `EditorError` (if any) could be used to specialize the notification (adjust string, localize, notification nature, ...)
                 Snackbar.make(binding.root, getString(R.string.app_error_notification, error.severity.name, error.message), Snackbar.LENGTH_LONG)
-                        .setAnchorView(binding.editorToolbarSheet.toolbarSettingsBottomSheet)
-                        .addCallback(object : Snackbar.Callback() {
-                            override fun onDismissed(snackbar: Snackbar?, event: Int) {
-                                snackbar?.removeCallback(this)
-                                viewModel.dismissErrorMessage(error)
-                            }
-                        })
-                        .show()
+                    .setAnchorView(binding.editorToolbarSheet.toolbarSettingsBottomSheet)
+                    .addCallback(object : Snackbar.Callback() {
+                        override fun onDismissed(snackbar: Snackbar?, event: Int) {
+                            snackbar?.removeCallback(this)
+                            viewModel.dismissErrorMessage(error)
+                        }
+                    })
+                    .show()
         }
     }
 
@@ -554,9 +599,9 @@ class WritingActivity : AppCompatActivity() {
             if (file != null) {
                 val uri = FileProvider.getUriForFile(this, "${BuildConfig.APPLICATION_ID}.export", file)
                 ShareCompat.IntentBuilder(this)
-                        .setType("application/octet-stream")
-                        .setStream(uri)
-                        .startChooser()
+                    .setType("application/octet-stream")
+                    .setStream(uri)
+                    .startChooser()
             }
         }
     }
@@ -581,9 +626,9 @@ class WritingActivity : AppCompatActivity() {
                             startActivity(Intent.createChooser(intent, uri.lastPathSegment))
                         } else {
                             ShareCompat.IntentBuilder(this)
-                                    .setType(mimeType.typeName)
-                                    .setStream(uri)
-                                    .startChooser()
+                                .setType(mimeType.typeName)
+                                .setStream(uri)
+                                .startChooser()
                         }
                     } else {
                         Toast.makeText(this, R.string.editor_export_failed, Toast.LENGTH_LONG).show()

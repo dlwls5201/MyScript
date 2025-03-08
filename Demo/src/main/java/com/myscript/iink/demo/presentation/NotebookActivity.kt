@@ -1,4 +1,4 @@
-package com.myscript.iink.demo
+package com.myscript.iink.demo.presentation
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

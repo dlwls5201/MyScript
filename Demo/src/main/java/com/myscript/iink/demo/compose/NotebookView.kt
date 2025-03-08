@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.myscript.iink.demo.WritingActivity
 import com.myscript.iink.demo.compose.component.AddingNotebookBottomSheet
 import com.myscript.iink.demo.compose.component.CircleOutlinedIconButton
 import com.myscript.iink.demo.compose.component.PageItem
+import com.myscript.iink.demo.presentation.WritingActivity
+import com.myscript.iink.demo.presentation.model.PageContentsModel
+import com.myscript.iink.demo.presentation.model.PageModel
 
 private val note1PageItems = listOf(
     "Hello", "Nice", "Happy"
@@ -78,8 +80,20 @@ fun NotebookView() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(note1PageItems.size) { index ->
+                        val content = note1PageItems[index]
                         PageItem(
-                            content = note1PageItems[index],
+                            content = content,
+                            onClick = {
+                                WritingActivity.startActivity(
+                                    context = context,
+                                    pageModel = PageModel(
+                                        notebookId = 1,
+                                        pageContent = PageContentsModel(
+                                            contents = content
+                                        )
+                                    )
+                                )
+                            }
                         )
                     }
                 }
