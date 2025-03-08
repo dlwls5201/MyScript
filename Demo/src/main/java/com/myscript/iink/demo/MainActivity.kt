@@ -160,9 +160,13 @@ class MainActivity : AppCompatActivity() {
     }
     private var addImagePosition: PointF? = null
 
-    private companion object {
-        const val EnableCapturePredictionByDefault: Boolean = true
-        const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
+    companion object {
+        private const val EnableCapturePredictionByDefault: Boolean = true
+        private const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
+
+        fun startActivity(context: Context) {
+            context.startActivity(Intent(context, MainActivity::class.java))
+        }
     }
 
     private val onEditorLongPress = IInputControllerListener { x, y, _ ->
