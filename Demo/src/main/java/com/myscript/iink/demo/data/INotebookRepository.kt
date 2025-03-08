@@ -24,6 +24,9 @@ interface INotebookRepository {
     @Throws(NotFoundException::class)
     suspend fun createPage(pageEntity: PageEntity): String
 
+    @Throws(NotFoundException::class)
+    suspend fun updatePage(pageEntity: PageEntity)
+
     suspend fun removePage(id: String)
 
     fun getPageList(notebookId: String): Flow<List<PageEntity>>

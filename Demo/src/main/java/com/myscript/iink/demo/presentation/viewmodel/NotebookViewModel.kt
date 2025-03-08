@@ -26,7 +26,7 @@ class NotebookViewModel @Inject constructor(
         val item = notebookItems.firstOrNull()?.firstOrNull()
         if (item == null) {
             val notebookId = createDefaultNotebook()
-            return notebookRepository.getNotebook(notebookId) ?: NotebookEntity.EMPTY_NOTEBOOK
+            return notebookRepository.getNotebook(notebookId) ?: NotebookEntity.DEFAULT
         }
         return item
     }

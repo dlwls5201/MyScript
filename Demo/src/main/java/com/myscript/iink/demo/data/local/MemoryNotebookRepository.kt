@@ -4,6 +4,7 @@ import android.content.res.Resources.NotFoundException
 import com.myscript.iink.demo.data.INotebookRepository
 import com.myscript.iink.demo.data.model.NotebookEntity
 import com.myscript.iink.demo.data.model.PageEntity
+import com.myscript.iink.demo.util.Dlog
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +42,7 @@ class MemoryNotebookRepository @Inject constructor() : INotebookRepository {
 
     @Throws(NotFoundException::class)
     override suspend fun createPage(pageEntity: PageEntity): String {
+        Dlog.d("createPage pageEntity: $pageEntity")
         val notebookId = pageEntity.notebookId
         val notebookItem = notebookItems.value.find { it.id == notebookId }
         if (notebookItem == null) {
@@ -49,6 +51,26 @@ class MemoryNotebookRepository @Inject constructor() : INotebookRepository {
 
         pageItems.value += pageEntity
         return pageEntity.id
+    }
+
+    override suspend fun updatePage(pageEntity: PageEntity) {
+        Dlog.d("updatePage pageEntity: $pageEntity")
+        val notebookId = pageEntity.notebookId
+        val notebookItem = notebookItems.value.find { it.id == notebookId }
+        if (notebookItem == null) {
+            throw NotFoundException("Notebook not found")
+        }
+
+        val foundItemIndex = pageItems.value.indexOfFirst { it.id == pageEntity.id }
+        if (foundItemIndex == -1) {
+            createPage(pageEntity)
+            return
+        }
+
+        val updatedPages = pageItems.value.toMutableList()
+        updatedPages[foundItemIndex] = pageEntity
+
+        pageItems.value = updatedPages
     }
 
     override suspend fun removePage(id: String) {

@@ -10,6 +10,13 @@ data class PageEntity private constructor(
 ) {
     companion object {
 
+        val DEFAULT = PageEntity(
+            id = "",
+            notebookId = "",
+            contents = "",
+            createAt = System.currentTimeMillis()
+        )
+
         fun create(notebookId: String, contents: String): PageEntity {
             return PageEntity(
                 id = UUID.randomUUID().toString(),

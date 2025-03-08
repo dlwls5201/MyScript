@@ -29,19 +29,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.myscript.iink.demo.presentation.compose.component.AddingNotebookBottomSheet
-import com.myscript.iink.demo.presentation.compose.component.CircleOutlinedIconButton
-import com.myscript.iink.demo.presentation.compose.component.PageItem
 import com.myscript.iink.demo.data.model.NotebookEntity
 import com.myscript.iink.demo.data.model.PageEntity
 import com.myscript.iink.demo.presentation.WritingActivity
+import com.myscript.iink.demo.presentation.compose.component.AddingNotebookBottomSheet
+import com.myscript.iink.demo.presentation.compose.component.CircleOutlinedIconButton
+import com.myscript.iink.demo.presentation.compose.component.PageItem
 import com.myscript.iink.demo.presentation.viewmodel.NotebookViewModel
 
 @Composable
 fun NotebookRoute(
     notebookViewModel: NotebookViewModel = hiltViewModel()
 ) {
-    var notebook by remember { mutableStateOf(NotebookEntity.EMPTY_NOTEBOOK) }
+    var notebook by remember { mutableStateOf(NotebookEntity.DEFAULT) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -96,7 +96,11 @@ fun NotebookView(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = notebook.title,
+                    text = if (notebook.id.isBlank()) {
+                        "Please select a notebook"
+                    } else {
+                        notebook.title
+                    },
                     style = MaterialTheme.typography.titleLarge,
                 )
             }
@@ -128,6 +132,7 @@ fun NotebookView(
                                 onClick = {
                                     WritingActivity.startActivity(
                                         context = context,
+                                        notebookId = page.notebookId,
                                         pageId = page.id
                                     )
                                 }
@@ -150,7 +155,10 @@ fun NotebookView(
                 imageVector = Icons.Default.Create,
                 contentDescription = "Create",
                 onClick = {
-                    WritingActivity.startActivity(context)
+                    WritingActivity.startActivity(
+                        context = context,
+                        notebookId = notebook.id,
+                    )
                 }
             )
         }
@@ -193,7 +201,7 @@ private fun NotebookViewPreview() {
 private fun NotebookViewEmptyPreview() {
     MaterialTheme {
         NotebookView(
-            notebook = NotebookEntity.EMPTY_NOTEBOOK,
+            notebook = NotebookEntity.DEFAULT,
             pageItems = emptyList()
         )
     }

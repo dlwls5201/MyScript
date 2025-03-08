@@ -27,6 +27,7 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.Snackbar
 import com.myscript.iink.Editor
@@ -34,13 +35,13 @@ import com.myscript.iink.MimeType
 import com.myscript.iink.demo.BuildConfig
 import com.myscript.iink.demo.IInkApplication
 import com.myscript.iink.demo.R
-import com.myscript.iink.demo.data.GeminiRepository
 import com.myscript.iink.demo.databinding.MainActivityBinding
 import com.myscript.iink.demo.di.EditorViewModelFactory
 import com.myscript.iink.demo.domain.BlockType
 import com.myscript.iink.demo.domain.MenuAction
 import com.myscript.iink.demo.domain.PartType
 import com.myscript.iink.demo.domain.PenBrush
+import com.myscript.iink.demo.presentation.viewmodel.WritingViewModel
 import com.myscript.iink.demo.ui.ColorState
 import com.myscript.iink.demo.ui.ColorsAdapter
 import com.myscript.iink.demo.ui.ContextualActionState
@@ -56,7 +57,6 @@ import com.myscript.iink.demo.ui.ThicknessesAdapter
 import com.myscript.iink.demo.ui.ToolState
 import com.myscript.iink.demo.ui.ToolsAdapter
 import com.myscript.iink.demo.ui.primaryFileExtension
-import com.myscript.iink.demo.util.Dlog
 import com.myscript.iink.demo.util.launchActionChoiceDialog
 import com.myscript.iink.demo.util.launchPredictionDialog
 import com.myscript.iink.demo.util.launchSingleChoiceDialog
@@ -71,7 +71,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import javax.inject.Inject
 import kotlin.math.roundToInt
 
 suspend fun Context.processUriFile(uri: Uri, file: File, logic: (File) -> Unit) {
@@ -132,8 +131,7 @@ private val PenBrush.label: Int
 @AndroidEntryPoint
 class WritingActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var geminiRepository: GeminiRepository
+    private val writingViewModel: WritingViewModel by viewModels()
 
     private val exportsDir: File
         get() = File(cacheDir, "exports").apply(File::mkdirs)
@@ -174,14 +172,17 @@ class WritingActivity : AppCompatActivity() {
         private const val EnableCapturePredictionByDefault: Boolean = true
         private const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
 
-        private const val PARAM_PAGE_ID = "page_id"
+        const val PARAM_NOTEBOOK_ID = "notebook_id"
+        const val PARAM_PAGE_ID = "page_id"
 
         fun startActivity(
             context: Context,
+            notebookId: String,
             pageId: String = "",
         ) {
             context.startActivity(
                 Intent(context, WritingActivity::class.java).apply {
+                    putExtra(PARAM_NOTEBOOK_ID, notebookId)
                     putExtra(PARAM_PAGE_ID, pageId)
                 }
             )
@@ -286,7 +287,7 @@ class WritingActivity : AppCompatActivity() {
         predictTextBtn?.setOnClickListener {
             val smartViewText = smartGuideView?.getSmartViewText() ?: return@setOnClickListener
             lifecycle.coroutineScope.launch {
-                val response = geminiRepository.generateText(smartViewText)
+                val response = writingViewModel.generatePredictText(smartViewText)
                 val builder = AlertDialog.Builder(this@WritingActivity)
                 builder.setTitle("Text Prediction")
                 builder.setMessage(response)
@@ -304,6 +305,22 @@ class WritingActivity : AppCompatActivity() {
         }
 
         setSupportActionBar(binding.toolbar)
+
+        if (writingViewModel.isValidNotebookId().not()) {
+            finish()
+            return
+        }
+
+        writingViewModel.initPage()
+
+        lifecycleScope.launch {
+            writingViewModel.pageFlow.collect { page ->
+                if (page.contents.isNotBlank()) {
+                    delay(200)
+                    smartGuideView?.setText(page.contents)
+                }
+            }
+        }
 
         viewModel.enableActivePen.observe(this) { activePenEnabled ->
             binding.editorToolbar.switchActivePen.isChecked = activePenEnabled
@@ -344,15 +361,6 @@ class WritingActivity : AppCompatActivity() {
             penBrushDropdown.adapter = penBrushesAdapter
             penBrushDropdown.onItemSelectedListener = penBrushSelectedListener
         }
-
-        val pageId = intent.getStringExtra(PARAM_PAGE_ID)
-        Dlog.d("pageId: $pageId")
-        /*if(notebookModel != null) {
-            lifecycle.coroutineScope.launch {
-                delay(200)
-                smartGuideView?.setText(notebookModel.pageContent.contents)
-            }
-        }*/
 
         // Note: could be managed by domain layer and handled through observable error channel
         // but kept simple as is to avoid adding too much complexity for this special (unrecoverable) error case
@@ -496,6 +504,9 @@ class WritingActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        smartGuideView?.getSmartViewText()?.let {
+            writingViewModel.savePage(it)
+        }
         smartGuideView?.setEditor(null)
         smartGuideView?.setMenuListener(null)
         viewModel.setEditor(null)

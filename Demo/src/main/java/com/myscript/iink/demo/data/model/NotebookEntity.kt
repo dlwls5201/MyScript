@@ -9,11 +9,11 @@ data class NotebookEntity private constructor(
 ) {
     companion object {
 
-        val DEFAULT_NOTEBOOK_NAME = "Notebook1"
+        const val DEFAULT_NOTEBOOK_NAME = "Notebook1"
 
-        val EMPTY_NOTEBOOK = NotebookEntity(
+        val DEFAULT = NotebookEntity(
             id = "",
-            title = "Please select a notebook",
+            title = "",
             createAt = System.currentTimeMillis()
         )
 
