@@ -66,11 +66,13 @@ import com.myscript.iink.uireferenceimplementation.EditorView
 import com.myscript.iink.uireferenceimplementation.FrameTimeEstimator
 import com.myscript.iink.uireferenceimplementation.IInputControllerListener
 import com.myscript.iink.uireferenceimplementation.SmartGuideView
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 suspend fun Context.processUriFile(uri: Uri, file: File, logic: (File) -> Unit) {
@@ -128,7 +130,10 @@ private val PenBrush.label: Int
         PenBrush.PENCIL -> R.string.pen_brush_pencil_brush
     }
 
+@AndroidEntryPoint
 class WritingActivity : AppCompatActivity() {
+
+    @Inject lateinit var geminiRepository: GeminiRepository
 
     private val exportsDir: File
         get() = File(cacheDir, "exports").apply(File::mkdirs)
@@ -281,7 +286,7 @@ class WritingActivity : AppCompatActivity() {
         predictTextBtn?.setOnClickListener {
             val smartViewText = smartGuideView?.getSmartViewText() ?: return@setOnClickListener
             lifecycle.coroutineScope.launch {
-                val response = GeminiRepository.generateText(smartViewText)
+                val response = geminiRepository.generateText(smartViewText)
                 val builder = AlertDialog.Builder(this@WritingActivity)
                 builder.setTitle("Text Prediction")
                 builder.setMessage(response)
@@ -344,7 +349,7 @@ class WritingActivity : AppCompatActivity() {
         Dlog.d("pageModel: $pageModel")
         if(pageModel != null) {
             lifecycle.coroutineScope.launch {
-                delay(100)
+                delay(200)
                 smartGuideView?.setText(pageModel.pageContent.contents)
             }
         }

@@ -3,8 +3,11 @@ package com.myscript.iink.demo.data
 import com.google.ai.client.generativeai.GenerativeModel
 import com.myscript.iink.demo.BuildConfig
 import com.myscript.iink.demo.util.Dlog
+import javax.inject.Inject
+import javax.inject.Singleton
 
-object GeminiRepository {
+@Singleton
+class GeminiRepository @Inject constructor() {
 
     private val generativeModel = GenerativeModel(
         // The Gemini 1.5 models are versatile and work with most use cases

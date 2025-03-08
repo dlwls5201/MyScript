@@ -4,7 +4,9 @@ package com.myscript.iink.demo
 
 import android.app.Application
 import com.myscript.iink.demo.di.DemoModule
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class IInkApplication : Application() {
 
     companion object {
