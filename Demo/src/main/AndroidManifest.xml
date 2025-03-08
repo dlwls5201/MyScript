@@ -21,7 +21,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.myscript.iink.demo.MainActivity"/>
+        <activity android:name="com.myscript.iink.demo.WritingActivity"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

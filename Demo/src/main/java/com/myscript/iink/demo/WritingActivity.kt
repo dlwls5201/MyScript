@@ -53,7 +53,6 @@ import com.myscript.iink.demo.ui.ThicknessesAdapter
 import com.myscript.iink.demo.ui.ToolState
 import com.myscript.iink.demo.ui.ToolsAdapter
 import com.myscript.iink.demo.ui.primaryFileExtension
-import com.myscript.iink.demo.util.Dlog
 import com.myscript.iink.demo.util.launchActionChoiceDialog
 import com.myscript.iink.demo.util.launchPredictionDialog
 import com.myscript.iink.demo.util.launchSingleChoiceDialog
@@ -123,7 +122,7 @@ private val PenBrush.label: Int
         PenBrush.PENCIL -> R.string.pen_brush_pencil_brush
     }
 
-class MainActivity : AppCompatActivity() {
+class WritingActivity : AppCompatActivity() {
 
     private val exportsDir: File
         get() = File(cacheDir, "exports").apply(File::mkdirs)
@@ -165,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         private const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
 
         fun startActivity(context: Context) {
-            context.startActivity(Intent(context, MainActivity::class.java))
+            context.startActivity(Intent(context, WritingActivity::class.java))
         }
     }
 
@@ -193,7 +192,7 @@ class MainActivity : AppCompatActivity() {
 
     private val importIInkFileRequest = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri == null) return@registerForActivityResult
-        val mimeType = DocumentFile.fromSingleUri(this@MainActivity, uri)?.type ?: contentResolver.getType(uri)
+        val mimeType = DocumentFile.fromSingleUri(this@WritingActivity, uri)?.type ?: contentResolver.getType(uri)
         when (mimeType) {
             "binary/octet-stream",
             "application/zip",
@@ -214,7 +213,7 @@ class MainActivity : AppCompatActivity() {
 
     private val importImageRequest = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri == null) return@registerForActivityResult
-        val mimeType = DocumentFile.fromSingleUri(this@MainActivity, uri)?.type ?: contentResolver.getType(uri)
+        val mimeType = DocumentFile.fromSingleUri(this@WritingActivity, uri)?.type ?: contentResolver.getType(uri)
         when (mimeType) {
             "image/png",
             "image/jpeg" -> lifecycle.coroutineScope.launch {
@@ -259,7 +258,7 @@ class MainActivity : AppCompatActivity() {
             val smartViewText = smartGuideView?.getSmartViewText() ?: return@setOnClickListener
             lifecycle.coroutineScope.launch {
                 val response = GeminiRepository.generateText(smartViewText)
-                val builder = AlertDialog.Builder(this@MainActivity)
+                val builder = AlertDialog.Builder(this@WritingActivity)
                 builder.setTitle("Text Prediction")
                 builder.setMessage(response)
                 builder.setPositiveButton("accept") { dialog, _ ->

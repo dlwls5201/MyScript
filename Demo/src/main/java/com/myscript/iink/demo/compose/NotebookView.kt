@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.myscript.iink.demo.MainActivity
+import com.myscript.iink.demo.WritingActivity
 import com.myscript.iink.demo.compose.component.AddingNotebookBottomSheet
 import com.myscript.iink.demo.compose.component.CircleOutlinedIconButton
 import com.myscript.iink.demo.compose.component.PageItem
@@ -98,7 +98,7 @@ fun NotebookView() {
                 imageVector = Icons.Default.Create,
                 contentDescription = "Create",
                 onClick = {
-                    MainActivity.startActivity(context)
+                    WritingActivity.startActivity(context)
                 }
             )
         }
