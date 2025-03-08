@@ -10,21 +10,23 @@ interface INotebookRepository {
     /**
      * notebook
      */
-    suspend fun createNotebook(notebookEntity: NotebookEntity)
+    suspend fun createNotebook(notebookEntity: NotebookEntity): String
 
-    suspend fun removeNotebook(id: Int)
+    suspend fun removeNotebook(id: String)
 
     fun getNotebookList(): Flow<List<NotebookEntity>>
+
+    suspend fun getNotebook(id: String): NotebookEntity?
 
     /**
      * page
      */
     @Throws(NotFoundException::class)
-    suspend fun createPage(pageEntity: PageEntity)
+    suspend fun createPage(pageEntity: PageEntity): String
 
-    suspend fun removePage(id: Int)
+    suspend fun removePage(id: String)
 
-    fun getPageList(notebookId: Int): Flow<List<PageEntity>>
+    fun getPageList(notebookId: String): Flow<List<PageEntity>>
 
-    suspend fun getPage(id: Int): PageEntity?
+    suspend fun getPage(id: String): PageEntity?
 }

@@ -26,7 +26,7 @@ fun NotebookItem(
                 onClick()
             },
         shape = RoundedCornerShape(8.dp),
-        shadowElevation = 1.dp
+        shadowElevation = 0.dp
     ) {
         Text(
             modifier = Modifier

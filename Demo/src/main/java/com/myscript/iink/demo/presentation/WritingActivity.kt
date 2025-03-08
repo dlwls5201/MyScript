@@ -41,7 +41,6 @@ import com.myscript.iink.demo.domain.BlockType
 import com.myscript.iink.demo.domain.MenuAction
 import com.myscript.iink.demo.domain.PartType
 import com.myscript.iink.demo.domain.PenBrush
-import com.myscript.iink.demo.presentation.model.PageModel
 import com.myscript.iink.demo.ui.ColorState
 import com.myscript.iink.demo.ui.ColorsAdapter
 import com.myscript.iink.demo.ui.ContextualActionState
@@ -133,7 +132,8 @@ private val PenBrush.label: Int
 @AndroidEntryPoint
 class WritingActivity : AppCompatActivity() {
 
-    @Inject lateinit var geminiRepository: GeminiRepository
+    @Inject
+    lateinit var geminiRepository: GeminiRepository
 
     private val exportsDir: File
         get() = File(cacheDir, "exports").apply(File::mkdirs)
@@ -174,15 +174,15 @@ class WritingActivity : AppCompatActivity() {
         private const val EnableCapturePredictionByDefault: Boolean = true
         private const val DefaultMinimumPredictionDurationMs: Int = 16 // 1 frame @60Hz, 2 frames @120Hz
 
-        private const val PARAM_PAGE_MODEL = "page"
+        private const val PARAM_PAGE_ID = "page_id"
 
         fun startActivity(
             context: Context,
-            pageModel: PageModel = PageModel.EMPTY,
+            pageId: String = "",
         ) {
             context.startActivity(
                 Intent(context, WritingActivity::class.java).apply {
-                    putExtra(PARAM_PAGE_MODEL, pageModel)
+                    putExtra(PARAM_PAGE_ID, pageId)
                 }
             )
         }
@@ -345,14 +345,14 @@ class WritingActivity : AppCompatActivity() {
             penBrushDropdown.onItemSelectedListener = penBrushSelectedListener
         }
 
-        val pageModel = intent.getParcelableExtra<PageModel>(PARAM_PAGE_MODEL)
-        Dlog.d("pageModel: $pageModel")
-        if(pageModel != null) {
+        val pageId = intent.getStringExtra(PARAM_PAGE_ID)
+        Dlog.d("pageId: $pageId")
+        /*if(notebookModel != null) {
             lifecycle.coroutineScope.launch {
                 delay(200)
-                smartGuideView?.setText(pageModel.pageContent.contents)
+                smartGuideView?.setText(notebookModel.pageContent.contents)
             }
-        }
+        }*/
 
         // Note: could be managed by domain layer and handled through observable error channel
         // but kept simple as is to avoid adding too much complexity for this special (unrecoverable) error case

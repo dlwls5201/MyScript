@@ -1,5 +1,6 @@
 package com.myscript.iink.demo.compose.component
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,39 +18,58 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-private val noteItems = listOf(
-    "Note1", "Note2", "Note3",
-)
+import com.myscript.iink.demo.data.model.NotebookEntity
+import com.myscript.iink.demo.presentation.viewmodel.NotebookViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddingNotebookBottomSheet(
     modifier: Modifier = Modifier,
-    onDismissRequest: () -> Unit = {}
+    notebookViewModel: NotebookViewModel,
+    onNotebookClick: (notebook: NotebookEntity) -> Unit = {},
+    onDismissRequest: () -> Unit = {},
 ) {
+    val scope = rememberCoroutineScope()
+    val notebookItems by notebookViewModel.notebookItems.collectAsState(emptyList())
 
     ModalBottomSheet(
         modifier = modifier,
         onDismissRequest = { onDismissRequest() },
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        AddingNotebookContent()
+        AddingNotebookContent(
+            notebookItems = notebookItems,
+            onNotebookClick = onNotebookClick,
+            onAddNoteBook = { title ->
+                scope.launch {
+                    notebookViewModel.createNotebook(title)
+                }
+            },
+        )
     }
 }
 
 @Composable
 private fun AddingNotebookContent(
     modifier: Modifier = Modifier,
+    notebookItems: List<NotebookEntity>,
+    onNotebookClick: (notebook: NotebookEntity) -> Unit = {},
+    onAddNoteBook: (String) -> Unit = {},
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -61,13 +81,17 @@ private fun AddingNotebookContent(
             style = MaterialTheme.typography.titleMedium,
         )
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(noteItems.size) { index ->
-                val notebook = noteItems[index]
+            items(notebookItems.size) { index ->
+                val notebook = notebookItems[index]
                 NotebookItem(
-                    content = notebook,
+                    content = notebook.title,
+                    onClick = {
+                        onNotebookClick(notebook)
+                    }
                 )
             }
         }
@@ -89,7 +113,15 @@ private fun AddingNotebookContent(
             CircleOutlinedIconButton(
                 imageVector = Icons.Default.Add,
                 contentDescription = "Add",
-                onClick = {}
+                onClick = {
+                    if (text.isEmpty()) {
+                        Toast.makeText(context, "Please enter notebook name", Toast.LENGTH_SHORT).show()
+                        return@CircleOutlinedIconButton
+                    }
+
+                    onAddNoteBook(text)
+                    text = ""
+                }
             )
         }
     }
@@ -98,5 +130,11 @@ private fun AddingNotebookContent(
 @Preview(showBackground = true)
 @Composable
 private fun AddingNotebookBottomSheetPreview() {
-    AddingNotebookContent()
+    AddingNotebookContent(
+        notebookItems = listOf(
+            NotebookEntity.create("Notebook1"),
+            NotebookEntity.create("Notebook2"),
+            NotebookEntity.create("Notebook3"),
+        )
+    )
 }
