@@ -1,4 +1,4 @@
-package com.myscript.iink.demo.compose
+package com.myscript.iink.demo.presentation.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,9 +29,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.myscript.iink.demo.compose.component.AddingNotebookBottomSheet
-import com.myscript.iink.demo.compose.component.CircleOutlinedIconButton
-import com.myscript.iink.demo.compose.component.PageItem
+import com.myscript.iink.demo.presentation.compose.component.AddingNotebookBottomSheet
+import com.myscript.iink.demo.presentation.compose.component.CircleOutlinedIconButton
+import com.myscript.iink.demo.presentation.compose.component.PageItem
 import com.myscript.iink.demo.data.model.NotebookEntity
 import com.myscript.iink.demo.data.model.PageEntity
 import com.myscript.iink.demo.presentation.WritingActivity

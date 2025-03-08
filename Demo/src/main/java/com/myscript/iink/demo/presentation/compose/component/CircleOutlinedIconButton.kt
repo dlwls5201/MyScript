@@ -1,4 +1,4 @@
-package com.myscript.iink.demo.compose.component
+package com.myscript.iink.demo.presentation.compose.component
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable

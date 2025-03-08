@@ -1,4 +1,4 @@
-package com.myscript.iink.demo.compose.component
+package com.myscript.iink.demo.presentation.compose.component
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
