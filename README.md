@@ -1,38 +1,90 @@
-## What is it about?
+# Android App Project
 
-Interactive Ink SDK is the best way to integrate handwriting recognition capabilities into your Android application. Interactive Ink extends digital ink to allow users to more intuitively create, interact with, and share content in digital form. Handwritten text, mathematical equations or even diagrams are interpreted in real-time to be editable via simple gestures, responsive and easy to convert to a neat output.
+## 📌 Project Overview
 
-This repository contains a "get started" example, a complete example and a reference implementation of the Android integration part that developers using Interactive Ink SDK can reuse inside their projects.
+This project implements **notebooks and pages** using the **MyScript iink SDK**. Additionally, it integrates inline text prediction.
 
-## Getting started
+## 🚀 Getting Started
 
-### Installation
+### Installation & Setup
 
-1. Clone the examples repository `git clone https://github.com/MyScript/interactive-ink-examples-android.git`
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/dlwls5201/MyScript/tree/assignment
+   ```
+2. Claim a certificate to receive the free license to start developing your application by following the first steps of [Getting Started](https://developer.myscript.com/getting-started).
+3. Copy this certificate to:
+   ```
+   GetStarted/src/main/java/com/myscript/certificate/MyCertificate.java  
+   Demo/src/main/java/com/myscript/certificate/MyCertificate.java
+   ```
+4. Obtain a **Gemini API Key** from [Google AI Gemini API](https://ai.google.dev/gemini-api/docs/api-key).
+5. Add the API key to your `local.properties` file:
+   ```
+   apiKey={your_gemini_api_key}
+   ```
 
-2. Claim a certificate to receive the free license to start develop your application by following the first steps of [Getting Started](https://developer.myscript.com/getting-started)
+## 🛠️ Tech Stack
 
-3. Copy this certificate to `GetStarted/src/main/java/com/myscript/certificate/MyCertificate.java` and `Demo/src/main/java/com/myscript/certificate/MyCertificate.java`
+Technologies, frameworks, and libraries used in this project:
 
-## Building your own integration
+- **Language**: Kotlin/Java
+- **Architecture**: MVVM / Clean Architecture
+- **UI**: Jetpack Compose / XML
+- **Handwriting Recognition**: [MyScript iink SDK](https://github.com/MyScript/interactive-ink-examples-android.git)
+- **Text Prediction**: [Gemini AI](https://gemini.google.com/app?hl=ko)
+- **Database**: Room
+- **Dependency Injection**: Hilt
+- **Others**: Coroutines, Flow, ViewModel, etc.
 
-This repository provides you with a ready-to-use reference implementation of the Android integration part, covering aspects like ink capture and rendering. It is located in `UIReferenceImplementation` directory and can be simply added to your project by referencing it in your `settings.gradle`.
+## ❌ Unresolved Issues
 
-## Documentation
+- I attempted to implement text prediction using TensorFlow.
+- I chose [Hugging Face GPT-2 model](https://huggingface.co/openai-community/gpt2).
+- I tried converting the GPT-2 model from Hugging Face to TFLite; below is the code I used
+```
+import tensorflow as tf
+from transformers import GPT2Tokenizer, TFGPT2LMHeadModel
 
-A complete guide is available on [MyScript Developer website](https://developer.myscript.com/docs/interactive-ink/latest/android/).
+model_name = "openai-community/gpt2"
+tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
-The API Reference is available directly in Android Studio once the dependencies are downloaded.
+model = TFGPT2LMHeadModel.from_pretrained(model_name, from_pt=True)  
 
-## Getting support
+h5_model_path = "gpt2_tf_model.h5"
+model.save_pretrained(h5_model_path)
 
-You can get some support from the dedicated section on [MyScript Developer website](https://developer.myscript.com/support/).
+saved_model_path = "gpt2_tf_saved_model"
+model = TFGPT2LMHeadModel.from_pretrained(h5_model_path) 
+tf.saved_model.save(model, saved_model_path) 
 
-## Troubleshoot
+print(f"✅ TensorFlow model saved to {saved_model_path}")
 
-If you encounter build errors of the form `No version of NDK matched the requested version`, please install the requested NDK version or update the one referenced in `build.gradle` to match your installed NDK version. You can follow [these instructions](https://developer.android.com/studio/projects/install-ndk#specific-version).
+# Convert to TensorFlow Lite
+converter = tf.lite.TFLiteConverter.from_saved_model("gpt2_tf_saved_model")
+converter.optimizations = [tf.lite.Optimize.DEFAULT] 
+tflite_model = converter.convert()
 
-## Sharing your feedback ?
+with open("gpt2_model.tflite", "wb") as f:
+    f.write(tflite_model)
 
-Made a cool app with Interactive Ink? Ready to cross join our marketing efforts? We would love to hear about you!
-We’re planning to showcase apps using it so let us know by sending a quick mail to [myapp@myscript.com](mailto://myapp@myscript.com).
+print("✅ TensorFlow Lite conversion completed! Model saved as gpt2_model.tflite")
+```
+
+### Result
+
+I successfully imported it, but it is not working as expected. As a result, I decided to use the Gemini API for text prediction.
+
+## 📸 Screenshots
+
+### Notebook And Page Screen
+- You can view the notebook title and pages
+<img src="screenshots/page.png" width="300">  
+
+### Adding Notebook Screen
+- You can create a new notebook in the bottom sheet.
+<img src="screenshots/notebook.png" width="300">  
+
+### Text Prediction Screen
+- Press the button to execute the text prediction function.
+<img src="screenshots/testprediction.png" width="300">  
