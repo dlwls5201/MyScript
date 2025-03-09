@@ -1,9 +1,9 @@
 package com.myscript.iink.demo.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.myscript.iink.demo.data.INotebookRepository
-import com.myscript.iink.demo.data.model.NotebookEntity
-import com.myscript.iink.demo.data.model.PageEntity
+import com.myscript.iink.demo.domain.INotebookRepository
+import com.myscript.iink.demo.domain.model.Notebook
+import com.myscript.iink.demo.domain.model.Page
 import com.myscript.iink.demo.util.Dlog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -20,28 +20,26 @@ class NotebookViewModel @Inject constructor(
         Dlog.e(throwable.message)
     }
 
-    val notebookItems: Flow<List<NotebookEntity>> = notebookRepository.getNotebookList()
+    val notebookItems: Flow<List<Notebook>> = notebookRepository.getNotebookList()
 
-    suspend fun getFirstNotebook(): NotebookEntity {
+    suspend fun getFirstNotebook(): Notebook {
         val item = notebookItems.firstOrNull()?.firstOrNull()
         if (item == null) {
             val notebookId = createDefaultNotebook()
-            return notebookRepository.getNotebook(notebookId) ?: NotebookEntity.DEFAULT
+            return notebookRepository.getNotebook(notebookId)
         }
         return item
     }
 
     private suspend fun createDefaultNotebook(): String {
-        return createNotebook(NotebookEntity.DEFAULT_NOTEBOOK_NAME)
+        return createNotebook(Notebook.DEFAULT_NOTEBOOK_NAME)
     }
 
     suspend fun createNotebook(title: String): String {
-        return notebookRepository.createNotebook(
-            NotebookEntity.create(title = title)
-        )
+        return notebookRepository.createNotebook(title = title)
     }
 
-    fun getPageItems(notebookId: String): Flow<List<PageEntity>> {
+    fun getPageItems(notebookId: String): Flow<List<Page>> {
         return notebookRepository.getPageList(notebookId)
     }
 }

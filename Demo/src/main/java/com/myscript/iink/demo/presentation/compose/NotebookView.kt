@@ -29,8 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.myscript.iink.demo.data.model.NotebookEntity
-import com.myscript.iink.demo.data.model.PageEntity
+import com.myscript.iink.demo.domain.model.Notebook
+import com.myscript.iink.demo.domain.model.Page
 import com.myscript.iink.demo.presentation.WritingActivity
 import com.myscript.iink.demo.presentation.compose.component.AddingNotebookBottomSheet
 import com.myscript.iink.demo.presentation.compose.component.CircleOutlinedIconButton
@@ -41,7 +41,7 @@ import com.myscript.iink.demo.presentation.viewmodel.NotebookViewModel
 fun NotebookRoute(
     notebookViewModel: NotebookViewModel = hiltViewModel()
 ) {
-    var notebook by remember { mutableStateOf(NotebookEntity.DEFAULT) }
+    var notebook by remember { mutableStateOf(Notebook.DEFAULT) }
     var showBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -73,8 +73,8 @@ fun NotebookRoute(
 @Composable
 fun NotebookView(
     modifier: Modifier = Modifier,
-    notebook: NotebookEntity,
-    pageItems: List<PageEntity>,
+    notebook: Notebook,
+    pageItems: List<Page>,
     onShowBottomSheet: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -96,10 +96,10 @@ fun NotebookView(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = if (notebook.id.isBlank()) {
-                        "Please select a notebook"
-                    } else {
+                    text = if (notebook.isValidationId) {
                         notebook.title
+                    } else {
+                        "Please select a notebook"
                     },
                     style = MaterialTheme.typography.titleLarge,
                 )
@@ -185,11 +185,11 @@ private fun EmptyNotebook(
 private fun NotebookViewPreview() {
     MaterialTheme {
         NotebookView(
-            notebook = NotebookEntity.create("Notebook1"),
+            notebook = Notebook.create(title = "Notebook1"),
             pageItems = listOf(
-                PageEntity.create(notebookId = "1", contents = "Page1"),
-                PageEntity.create(notebookId = "2", contents = "Page2"),
-                PageEntity.create(notebookId = "3", contents = "Page3"),
+                Page.create(contents = "Page1"),
+                Page.create(contents = "Page2"),
+                Page.create(contents = "Page3"),
             )
         )
     }
@@ -201,7 +201,7 @@ private fun NotebookViewPreview() {
 private fun NotebookViewEmptyPreview() {
     MaterialTheme {
         NotebookView(
-            notebook = NotebookEntity.DEFAULT,
+            notebook = Notebook.DEFAULT,
             pageItems = emptyList()
         )
     }

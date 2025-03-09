@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myscript.iink.demo.data.GeminiRepository
-import com.myscript.iink.demo.data.INotebookRepository
-import com.myscript.iink.demo.data.model.PageEntity
 import com.myscript.iink.demo.di.AppScope
+import com.myscript.iink.demo.domain.INotebookRepository
+import com.myscript.iink.demo.domain.model.Page
 import com.myscript.iink.demo.presentation.WritingActivity
 import com.myscript.iink.demo.util.Dlog
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+enum class WritingType {
+    NEW, UPDATE
+}
 
 @HiltViewModel
 class WritingViewModel @Inject constructor(
@@ -32,8 +36,15 @@ class WritingViewModel @Inject constructor(
     private val pageId = savedStateHandle.get<String>(WritingActivity.PARAM_PAGE_ID) ?: ""
     private val notebookId = savedStateHandle.get<String>(WritingActivity.PARAM_NOTEBOOK_ID) ?: ""
 
-    private val _pageFlow = MutableStateFlow(PageEntity.DEFAULT)
+    private val _pageFlow = MutableStateFlow(Page.DEFAULT)
     val pageFlow = _pageFlow.asStateFlow()
+
+    private val writingType
+        get() = if (pageId.isBlank()) {
+            WritingType.NEW
+        } else {
+            WritingType.UPDATE
+        }
 
     fun isValidNotebookId(): Boolean {
         return notebookId.isNotBlank()
@@ -41,8 +52,9 @@ class WritingViewModel @Inject constructor(
 
     fun initPage() {
         viewModelScope.launch(exceptionHandler) {
-            notebookRepository.getPage(pageId)?.let {
-                _pageFlow.value = it
+            val page = notebookRepository.getPage(pageId)
+            if (page.isValidationId) {
+                _pageFlow.value = page
             }
         }
     }
@@ -53,14 +65,16 @@ class WritingViewModel @Inject constructor(
         }
 
         appScope.launch(exceptionHandler) {
-            if (pageId.isBlank()) {
-                val page = PageEntity.create(notebookId, contents)
-                notebookRepository.createPage(page)
-            } else {
-                val page = _pageFlow.value.copy(
-                    contents = contents
-                )
-                notebookRepository.updatePage(page)
+            when (writingType) {
+                WritingType.NEW -> {
+                    notebookRepository.createPage(notebookId = notebookId, contents = contents)
+                }
+
+                WritingType.UPDATE -> {
+                    notebookRepository.updatePage(
+                        notebookId = notebookId, pageId = pageId, contents = contents
+                    )
+                }
             }
         }
     }

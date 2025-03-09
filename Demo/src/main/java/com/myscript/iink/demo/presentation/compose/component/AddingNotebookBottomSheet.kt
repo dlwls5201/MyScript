@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.myscript.iink.demo.data.model.NotebookEntity
+import com.myscript.iink.demo.domain.model.Notebook
 import com.myscript.iink.demo.presentation.viewmodel.NotebookViewModel
 import kotlinx.coroutines.launch
 
@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 fun AddingNotebookBottomSheet(
     modifier: Modifier = Modifier,
     notebookViewModel: NotebookViewModel,
-    onNotebookClick: (notebook: NotebookEntity) -> Unit = {},
+    onNotebookClick: (notebook: Notebook) -> Unit = {},
     onDismissRequest: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
@@ -64,8 +64,8 @@ fun AddingNotebookBottomSheet(
 @Composable
 private fun AddingNotebookContent(
     modifier: Modifier = Modifier,
-    notebookItems: List<NotebookEntity>,
-    onNotebookClick: (notebook: NotebookEntity) -> Unit = {},
+    notebookItems: List<Notebook>,
+    onNotebookClick: (notebook: Notebook) -> Unit = {},
     onAddNoteBook: (String) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -132,9 +132,9 @@ private fun AddingNotebookContent(
 private fun AddingNotebookBottomSheetPreview() {
     AddingNotebookContent(
         notebookItems = listOf(
-            NotebookEntity.create("Notebook1"),
-            NotebookEntity.create("Notebook2"),
-            NotebookEntity.create("Notebook3"),
+            Notebook.create("Notebook1"),
+            Notebook.create("Notebook2"),
+            Notebook.create("Notebook3"),
         )
     )
 }

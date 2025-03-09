@@ -1,26 +1,26 @@
-package com.myscript.iink.demo.data.model
+package com.myscript.iink.demo.domain.model
 
-import java.util.UUID
-
-data class PageEntity private constructor(
+data class Page(
     val id: String,
     val notebookId: String,
     val contents: String,
     val createAt: Long,
 ) {
+    val isValidationId get() = id.isNotEmpty()
+
     companion object {
 
-        val DEFAULT = PageEntity(
+        val DEFAULT = Page(
             id = "",
             notebookId = "",
             contents = "",
             createAt = System.currentTimeMillis()
         )
 
-        fun create(notebookId: String, contents: String): PageEntity {
-            return PageEntity(
-                id = UUID.randomUUID().toString(),
-                notebookId = notebookId,
+        fun create(contents: String): Page {
+            return Page(
+                id = "",
+                notebookId = "",
                 contents = contents,
                 createAt = System.currentTimeMillis()
             )

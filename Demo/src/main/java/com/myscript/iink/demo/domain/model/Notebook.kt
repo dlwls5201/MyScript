@@ -1,25 +1,26 @@
-package com.myscript.iink.demo.data.model
+package com.myscript.iink.demo.domain.model
 
-import java.util.UUID
 
-data class NotebookEntity private constructor(
+data class Notebook(
     val id: String,
     val title: String,
     val createAt: Long,
 ) {
+    val isValidationId get() = id.isNotEmpty()
+
     companion object {
 
         const val DEFAULT_NOTEBOOK_NAME = "Notebook1"
 
-        val DEFAULT = NotebookEntity(
+        val DEFAULT = Notebook(
             id = "",
             title = "",
             createAt = System.currentTimeMillis()
         )
 
-        fun create(title: String): NotebookEntity {
-            return NotebookEntity(
-                id = UUID.randomUUID().toString(),
+        fun create(title: String): Notebook {
+            return Notebook(
+                id = "",
                 title = title,
                 createAt = System.currentTimeMillis()
             )
