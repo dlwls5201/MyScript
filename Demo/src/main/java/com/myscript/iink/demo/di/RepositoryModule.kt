@@ -2,6 +2,7 @@ package com.myscript.iink.demo.di
 
 import com.myscript.iink.demo.domain.INotebookRepository
 import com.myscript.iink.demo.data.local.memory.MemoryNotebookRepository
+import com.myscript.iink.demo.data.local.room.RoomNotebookRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,9 +13,15 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
-    @Binds
+    /*@Binds
     @Singleton
     abstract fun bindNotebookRepository(
         impl: MemoryNotebookRepository,
+    ): INotebookRepository*/
+
+    @Binds
+    @Singleton
+    abstract fun bindNotebookRepository(
+        impl: RoomNotebookRepository,
     ): INotebookRepository
 }
