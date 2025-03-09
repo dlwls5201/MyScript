@@ -312,7 +312,13 @@ class WritingActivity : AppCompatActivity() {
             return
         }
 
-        writingViewModel.initPage()
+        writingViewModel.initPage {
+            lifecycleScope.launch {
+                delay(200)
+                viewModel.clearContent()
+                smartGuideView?.clearContent()
+            }
+        }
 
         lifecycleScope.launch {
             writingViewModel.pageFlow.collect { page ->

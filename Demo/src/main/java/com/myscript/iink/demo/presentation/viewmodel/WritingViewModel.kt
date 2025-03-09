@@ -50,11 +50,13 @@ class WritingViewModel @Inject constructor(
         return notebookId.isNotBlank()
     }
 
-    fun initPage() {
+    fun initPage(clearContents: () -> Unit = {}) {
         viewModelScope.launch(exceptionHandler) {
             val page = notebookRepository.getPage(pageId)
             if (page.isValidationId) {
                 _pageFlow.value = page
+            } else {
+                clearContents()
             }
         }
     }

@@ -708,6 +708,11 @@ public class SmartGuideView extends LinearLayout implements IEditorListener, IRe
     return stringBuilder.toString();
   }
 
+  public void clearContent() {
+    LinearLayout linearLayout = findViewById(R.id.smart_guide_stack_view);
+    linearLayout.removeAllViews();
+  }
+
   public void setText(String text) {
     if (editor != null) {
       try {
