@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.myscript.iink.demo.data.GeminiRepository
+import com.myscript.iink.demo.data.tensonflow.TextPredictor
 import com.myscript.iink.demo.di.AppScope
 import com.myscript.iink.demo.domain.INotebookRepository
 import com.myscript.iink.demo.domain.model.Page
@@ -23,6 +24,7 @@ enum class WritingType {
 
 @HiltViewModel
 class WritingViewModel @Inject constructor(
+    private val textPredictor: TextPredictor,
     private val geminiRepository: GeminiRepository,
     private val notebookRepository: INotebookRepository,
     @AppScope private val appScope: CoroutineScope,
@@ -84,6 +86,7 @@ class WritingViewModel @Inject constructor(
     suspend fun generatePredictText(text: String): String {
         return try {
             geminiRepository.generateText(text)
+            //TODO textPredictor.predictNextWord(text)
         } catch (e: Exception) {
             Dlog.e(e.message)
             text

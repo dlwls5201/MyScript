@@ -61,6 +61,11 @@ dependencies {
     // gemini
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 
+    // tensorflow
+    def tensorflow_version = "2.17.0"
+    implementation "org.tensorflow:tensorflow-lite:$tensorflow_version"
+    implementation 'com.google.ai.edge.litert:litert-support-api:1.1.2'
+
     // compose
     implementation platform('androidx.compose:compose-bom:2025.02.00')
     implementation 'androidx.compose.material3:material3'
