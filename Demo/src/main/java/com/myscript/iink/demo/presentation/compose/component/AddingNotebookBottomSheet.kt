@@ -132,9 +132,9 @@ private fun AddingNotebookContent(
 private fun AddingNotebookBottomSheetPreview() {
     AddingNotebookContent(
         notebookItems = listOf(
-            Notebook.create("Notebook1"),
-            Notebook.create("Notebook2"),
-            Notebook.create("Notebook3"),
+            Notebook.create(title = "Notebook1"),
+            Notebook.create(title = "Notebook2"),
+            Notebook.create(title = "Notebook3"),
         )
     )
 }

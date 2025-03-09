@@ -113,4 +113,13 @@ class RoomNotebookRepository @Inject constructor(
             Page.DEFAULT
         }
     }
+
+    override suspend fun deleteAllData() {
+        try {
+            pageDao.deleteAll()
+            notebookDao.deleteAll()
+        } catch (e: Exception) {
+            Dlog.d(e.message)
+        }
+    }
 }

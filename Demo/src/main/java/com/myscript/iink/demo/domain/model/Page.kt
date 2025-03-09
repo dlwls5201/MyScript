@@ -17,10 +17,14 @@ data class Page(
             createAt = System.currentTimeMillis()
         )
 
-        fun create(contents: String): Page {
+        fun create(
+            id: String = "",
+            notebookId: String = "",
+            contents: String,
+        ): Page {
             return Page(
-                id = "",
-                notebookId = "",
+                id = id,
+                notebookId = notebookId,
                 contents = contents,
                 createAt = System.currentTimeMillis()
             )

@@ -10,17 +10,15 @@ data class Notebook(
 
     companion object {
 
-        const val DEFAULT_NOTEBOOK_NAME = "Notebook1"
-
         val DEFAULT = Notebook(
             id = "",
             title = "",
             createAt = System.currentTimeMillis()
         )
 
-        fun create(title: String): Notebook {
+        fun create(id: String = "", title: String): Notebook {
             return Notebook(
-                id = "",
+                id = id,
                 title = title,
                 createAt = System.currentTimeMillis()
             )

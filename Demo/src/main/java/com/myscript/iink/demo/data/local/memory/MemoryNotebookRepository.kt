@@ -92,4 +92,9 @@ class MemoryNotebookRepository @Inject constructor() : INotebookRepository {
         val foundItem = pageItems.value.find { it.id == id }
         return foundItem ?: Page.DEFAULT
     }
+
+    override suspend fun deleteAllData() {
+        notebookItems.value = emptyList()
+        pageItems.value = emptyList()
+    }
 }

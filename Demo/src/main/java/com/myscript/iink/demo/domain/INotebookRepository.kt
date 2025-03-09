@@ -34,4 +34,9 @@ interface INotebookRepository {
     fun getPageList(notebookId: String): Flow<List<Page>>
 
     suspend fun getPage(id: String): Page
+
+    /**
+     * delete all data
+     */
+    suspend fun deleteAllData()
 }

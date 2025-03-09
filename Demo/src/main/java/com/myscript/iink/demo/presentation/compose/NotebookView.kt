@@ -1,5 +1,6 @@
 package com.myscript.iink.demo.presentation.compose
 
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,11 +43,19 @@ import com.myscript.iink.demo.presentation.viewmodel.NotebookViewModel
 fun NotebookRoute(
     notebookViewModel: NotebookViewModel = hiltViewModel()
 ) {
-    var notebook by remember { mutableStateOf(Notebook.DEFAULT) }
-    var showBottomSheet by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
+    var notebook by remember { mutableStateOf(Notebook.DEFAULT) }
     LaunchedEffect(Unit) {
         notebook = notebookViewModel.getFirstNotebook()
+    }
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    val notebookItems = notebookViewModel.notebookItems.collectAsState(emptyList())
+    val foundNotebookItem = notebookItems.value.find { it.id == notebook.id }
+    if(foundNotebookItem == null) {
+        notebook = Notebook.DEFAULT
     }
 
     val pageItems by notebookViewModel.getPageItems(notebook.id).collectAsState(emptyList())
@@ -55,6 +65,22 @@ fun NotebookRoute(
         pageItems = pageItems,
         onShowBottomSheet = {
             showBottomSheet = true
+        },
+        onDeleteAllData = {
+            val builder = AlertDialog.Builder(context)
+            builder.setTitle("Delete all data")
+            builder.setMessage("Would you like to delete all notebook data?")
+            builder.setPositiveButton("ok") { dialog, _ ->
+                notebookViewModel.deleteAllData()
+                dialog.dismiss()
+            }
+            builder.setNegativeButton("cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+
+            val dialog = builder.create()
+            dialog.show()
+
         }
     )
 
@@ -76,6 +102,7 @@ fun NotebookView(
     notebook: Notebook,
     pageItems: List<Page>,
     onShowBottomSheet: () -> Unit = {},
+    onDeleteAllData: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -143,7 +170,7 @@ fun NotebookView(
             }
         }
 
-        Box(
+        Column(
             modifier = Modifier
                 .padding(
                     end = 12.dp,
@@ -151,6 +178,14 @@ fun NotebookView(
                 )
                 .align(Alignment.BottomEnd)
         ) {
+            CircleOutlinedIconButton(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete",
+                onClick = {
+                    onDeleteAllData()
+                }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             CircleOutlinedIconButton(
                 imageVector = Icons.Default.Create,
                 contentDescription = "Create",
@@ -185,7 +220,7 @@ private fun EmptyNotebook(
 private fun NotebookViewPreview() {
     MaterialTheme {
         NotebookView(
-            notebook = Notebook.create(title = "Notebook1"),
+            notebook = Notebook.create(id = "1", title = "Notebook1"),
             pageItems = listOf(
                 Page.create(contents = "Page1"),
                 Page.create(contents = "Page2"),

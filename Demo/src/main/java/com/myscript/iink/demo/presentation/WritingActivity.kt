@@ -307,6 +307,7 @@ class WritingActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
 
         if (writingViewModel.isValidNotebookId().not()) {
+            Toast.makeText(this, "Please select a notebook", Toast.LENGTH_SHORT).show()
             finish()
             return
         }

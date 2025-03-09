@@ -1,6 +1,7 @@
 package com.myscript.iink.demo.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.myscript.iink.demo.domain.INotebookRepository
 import com.myscript.iink.demo.domain.model.Notebook
 import com.myscript.iink.demo.domain.model.Page
@@ -9,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,16 +25,8 @@ class NotebookViewModel @Inject constructor(
     val notebookItems: Flow<List<Notebook>> = notebookRepository.getNotebookList()
 
     suspend fun getFirstNotebook(): Notebook {
-        val item = notebookItems.firstOrNull()?.firstOrNull()
-        if (item == null) {
-            val notebookId = createDefaultNotebook()
-            return notebookRepository.getNotebook(notebookId)
-        }
+        val item = notebookItems.firstOrNull()?.firstOrNull() ?: return Notebook.DEFAULT
         return item
-    }
-
-    private suspend fun createDefaultNotebook(): String {
-        return createNotebook(Notebook.DEFAULT_NOTEBOOK_NAME)
     }
 
     suspend fun createNotebook(title: String): String {
@@ -41,5 +35,11 @@ class NotebookViewModel @Inject constructor(
 
     fun getPageItems(notebookId: String): Flow<List<Page>> {
         return notebookRepository.getPageList(notebookId)
+    }
+
+    fun deleteAllData() {
+        viewModelScope.launch(exceptionHandler) {
+            notebookRepository.deleteAllData()
+        }
     }
 }

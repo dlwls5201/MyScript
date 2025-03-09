@@ -25,4 +25,7 @@ interface NotebookDao {
 
     @Delete
     suspend fun delete(entity: NotebookEntity)
+
+    @Query("DELETE FROM NotebookEntity")
+    suspend fun deleteAll()
 }
